@@ -1,0 +1,476 @@
+/**
+ * 引用 Android 系统库，示例如下：
+ * import { Context } from "android.content.Context";
+ * [可选实现，按需引入]
+ */
+/* 引入 interface.uts 文件中定义的变量 */
+import { MyApiOptions, MyApiResult, MyApi, MyApiSync } from '../interface.uts';
+/* 引入 unierror.uts 文件中定义的变量 */
+import { MyApiFailImpl } from '../unierror';
+// import Toast from 'android.widget.Toast';
+// import ViewGroup from "android.view.ViewGroup";
+import Context from 'android.content.Context';
+import Gravity from 'android.view.Gravity';
+import ViewGroup from 'android.view.ViewGroup';
+import WindowManager from 'android.view.WindowManager';
+import Toast from 'android.widget.Toast';
+import Class from 'java.lang.Class';
+import Field from 'java.lang.reflect.Field';
+import Exception from 'java.lang.Exception';
+import GradientDrawable from 'android.graphics.drawable.GradientDrawable';
+import LinearLayout from 'android.widget.LinearLayout';
+import Color from 'android.graphics.Color';
+import ImageView from "android.widget.ImageView";
+import BitmapFactory from 'android.graphics.BitmapFactory';
+import Im from 'android.provider.ContactsContract.CommonDataKinds.Im';
+import TextView from 'android.widget.TextView';
+import TypedValue from 'android.util.TypedValue';
+import AlertDialog from 'android.app.AlertDialog';
+import DialogInterface from "android.content.DialogInterface";
+import System from "java.lang.System";
+import CharSequence from 'java.lang.CharSequence';
+import ArrayAdapter from "android.widget.ArrayAdapter";
+import ArrayList from 'java.util.ArrayList';
+import List from "java.util.List";
+import SaveImageToPhotosAlbumOptions from 'uts.sdk.modules.DCloudUniMedia.SaveImageToPhotosAlbumOptions';
+import Base64 from "android.util.Base64";
+import ContentValues from "android.content.ContentValues";
+import MediaStore from "android.provider.MediaStore";
+import Bitmap from "android.graphics.Bitmap";
+import Uri from "android.net.Uri";
+import OutputStream from "java.io.OutputStream";
+import IOException from "java.io.IOException";
+import ByteArray from "kotlin.ByteArray";
+import Objects from "java.util.Objects";
+import Drawable from 'android.graphics.drawable.Drawable';
+import Resources from "android.content.res.Resources";
+import Int from "kotlin.Int";
+import EditText from 'android.widget.EditText';
+import Locale from "java.util.Locale";
+import UUID from "java.util.UUID";
+import Bundle from "android.os.Bundle";
+import Set from 'java.util.Set';
+import Voice from 'android.speech.tts.Voice';
+import TextToSpeech from "android.speech.tts.TextToSpeech";
+import UtteranceProgressListener from 'android.speech.tts.UtteranceProgressListener';
+// import Snackbar from 'com.google.android.material.snackbar.Snackbar'
+/**
+ * 引入三方库
+ * [可选实现，按需引入]
+ *
+ * 在 Android 平台引入三方库有以下两种方式：
+ * 1、[推荐] 通过 仓储 方式引入，将 三方库的依赖信息 配置到 config.json 文件下的 dependencies 字段下。详细配置方式[详见](https://uniapp.dcloud.net.cn/plugin/uts-plugin.html#dependencies)
+ * 2、直接引入，将 三方库的aar或jar文件 放到libs目录下。更多信息[详见](https://uniapp.dcloud.net.cn/plugin/uts-plugin.html#android%E5%B9%B3%E5%8F%B0%E5%8E%9F%E7%94%9F%E9%85%8D%E7%BD%AE)
+ *
+ * 在通过上述任意方式依赖三方库后，使用时需要在文件中 import，如下示例：
+ * import { LottieAnimationView } from 'com.airbnb.lottie.LottieAnimationView'
+ */
+/**
+ * UTSAndroid 为平台内置对象，不需要 import 可直接调用其API，[详见](https://uniapp.dcloud.net.cn/uts/utsandroid.html#utsandroid)
+ */
+/**
+ * 异步方法
+ *
+ * uni-app项目中（vue/nvue）调用示例：
+ * 1、引入方法声明 import { myApi } from "@/uni_modules/uts-api"
+ * 2、方法调用
+ * myApi({
+ *   paramA: false,
+ *   complete: (res) => {
+ *      console.log(res)
+ *   }
+ * });
+ * uni-app x项目（uvue）中调用示例：
+ * 1、引入方法及参数声明 import { myApi, MyApiOptions } from "@/uni_modules/uts-api";
+ * 2、方法调用
+ * let options = {
+ *   paramA: false,
+ *   complete: (res : any) => {
+ *     console.log(res)
+ *   }
+ * } as MyApiOptions;
+ * myApi(options);
+ *
+ */
+export const myApi: MyApi = function (options: MyApiOptions) {
+    if (options.paramA == true) {
+        // 返回数据
+        const res: MyApiResult = {
+            fieldA: 85,
+            fieldB: true,
+            fieldC: 'some message'
+        };
+        options.success?.(res);
+        options.complete?.(res);
+    }
+    else {
+        // 返回错误
+        const err = new MyApiFailImpl(9010001);
+        options.fail?.(err);
+        options.complete?.(err);
+    }
+};
+/**
+ * 同步方法
+ *
+ * uni-app项目中（vue/nvue）调用示例：
+ * 1、引入方法声明 import { myApiSync } from "@/uni_modules/uts-api"
+ * 2、方法调用 myApiSync(true)
+ *
+ * uni-app x项目（uvue）中调用示例：
+ * 1、引入方法及参数声明 import { myApiSync } from "@/uni_modules/uts-api";
+ * 2、方法调用 myApiSync(true)
+ */
+export const myApiSync: MyApiSync = function (paramA: boolean): MyApiResult {
+    // 返回数据，根据插件功能获取实际的返回值
+    const res: MyApiResult = {
+        fieldA: 85,
+        fieldB: paramA,
+        fieldC: 'some message'
+    };
+    return res;
+};
+var mToast: Toast | null = null;
+var mLastText = "";
+var mLastTime = 0;
+var mLastDuration = 0;
+export const showToast = function (text: string) {
+    if (mToast == null) {
+        mToast = Toast.makeText(UTSAndroid.getAppContext()!!, text, Toast.LENGTH_LONG);
+    }
+    else {
+        if (Objects.equals(text, mLastText) && System.currentTimeMillis() - mLastTime < mLastDuration) {
+            return;
+        }
+        mToast!!.cancel();
+        mToast = Toast.makeText(UTSAndroid.getAppContext()!!, text, Toast.LENGTH_SHORT);
+        mLastDuration = Toast.LENGTH_LONG;
+        mLastTime = System.currentTimeMillis();
+        mLastText = text;
+    }
+    mToast!!.setGravity(Gravity.CENTER, 0, 0);
+    mToast!!.show();
+};
+export const showColorToast = function (text: string, color: string) {
+    var tv = new TextView(UTSAndroid.getAppContext()!!);
+    var b: GradientDrawable = getSoldRadiusBg(Color.parseColor(color), 60);
+    tv.setBackgroundDrawable(b as Drawable);
+    var r1 = convertHtmlPxToAndroidPx(20).toInt();
+    var r2 = convertHtmlPxToAndroidPx(10).toInt();
+    tv.setPadding(r1, r2, r1, r2);
+    tv.setTextColor(Color.WHITE);
+    tv.setTextSize((16).toFloat());
+    tv.setText(text);
+    if (mToast == null) {
+        mToast = new Toast(UTSAndroid.getAppContext()!!);
+        mToast!!.setView(tv);
+    }
+    else {
+        if (Objects.equals(text, mLastText) && System.currentTimeMillis() - mLastTime < mLastDuration) {
+            return;
+        }
+        mToast!!.cancel();
+        mToast = Toast.makeText(UTSAndroid.getAppContext()!!, text, Toast.LENGTH_SHORT);
+        mToast!!.setView(tv);
+        mLastDuration = Toast.LENGTH_LONG;
+        mLastTime = System.currentTimeMillis();
+        mLastText = text;
+    }
+    mToast!!.setGravity(Gravity.CENTER, 0, 0);
+    mToast!!.show();
+};
+export const showToastButton = function (text: string) {
+    if (mToast == null) {
+        mToast = Toast.makeText(UTSAndroid.getAppContext()!!, text, Toast.LENGTH_LONG);
+    }
+    else {
+        if (Objects.equals(text, mLastText) && System.currentTimeMillis() - mLastTime < mLastDuration) {
+            return;
+        }
+        mToast!!.cancel();
+        mToast = Toast.makeText(UTSAndroid.getAppContext()!!, text, Toast.LENGTH_SHORT);
+        mLastDuration = Toast.LENGTH_LONG;
+        mLastTime = System.currentTimeMillis();
+        mLastText = text;
+    }
+    mToast!!.show();
+};
+export const androidDialog = function (title: string, msg: string, okText: string, callback: () => void, cancelText: string, callback1: () => void) {
+    class MyOnClickListener implements DialogInterface.OnClickListener {
+        type: number;
+        constructor(type: number) {
+            this.type = type;
+        }
+        public override onClick(dialogInterface: DialogInterface, i: Int) {
+            if (this.type == 0) {
+                callback();
+                dialogInterface.dismiss();
+            }
+            else if (this.type == 1) {
+                callback1();
+                dialogInterface.dismiss();
+            }
+        }
+    }
+    var builder: AlertDialog.Builder = new AlertDialog.Builder(UTSAndroid.getUniActivity()!!);
+    if (title != "") {
+        builder.setTitle(title);
+    }
+    builder.setMessage(msg);
+    builder.setPositiveButton(okText, new MyOnClickListener(0));
+    if (cancelText != "") {
+        builder.setNegativeButton(cancelText, new MyOnClickListener(1));
+    }
+    builder.create().show();
+};
+export const isHavePermision = function (pername: string): boolean {
+    return UTSAndroid.checkSystemPermissionGranted(UTSAndroid.getUniActivity()!, [pername]);
+};
+export const requestPermison = function (pername: string, callback: (sth: boolean) => void) {
+    if (isHavePermision(pername)) {
+        callback(true);
+        return;
+    }
+    UTSAndroid.requestSystemPermission(UTSAndroid.getUniActivity()!, [pername], (_: boolean, p: string[]) => {
+        console.log(p);
+        callback(true);
+    }, (_: boolean, p: string[]) => {
+        callback(false);
+        console.log(p);
+    });
+};
+export const requesMoretPermison = function (pername: string[], callback: (sth: boolean) => void) {
+    var have = true;
+    for (var per = 0; per < pername.length; per++) {
+        if (!isHavePermision(pername[per])) {
+            have = false;
+        }
+    }
+    if (have) {
+        callback(true);
+        return;
+    }
+    var len = pername.length;
+    UTSAndroid.requestSystemPermission(UTSAndroid.getUniActivity()!, pername, (_: boolean, p: string[]) => {
+        console.log(p);
+        if (p.length == len) {
+            callback(true);
+        }
+        // callback(true)
+    }, (_: boolean, p: string[]) => {
+        console.log(p);
+        callback(false);
+    });
+};
+export const saveBase64ToGallery = function (name: string, base64: string, callback: (sth: boolean) => void) {
+    if (isHavePermision("android.permission.WRITE_EXTERNAL_STORAGE") && isHavePermision("android.permission.READ_MEDIA_IMAGES")) {
+        saveBitmap(name, base64, callback);
+    }
+    else {
+        requesMoretPermison(["android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_MEDIA_IMAGES"], function (state: boolean) {
+            if (state) {
+                saveBitmap(name, base64, callback);
+            }
+            else {
+                callback(state);
+            }
+        });
+    }
+};
+export const saveBitmap = function (name: string, base64: string, callback: (sth: boolean) => void) {
+    var decode: ByteArray = Base64.decode(base64, Base64.DEFAULT);
+    var bitmapImage: Bitmap = BitmapFactory.decodeByteArray(decode, (0).toInt(), decode.size);
+    var contentValues: ContentValues = new ContentValues();
+    contentValues.put("_display_name", name);
+    contentValues.put("mime_type", "image/jpeg");
+    var uri: Uri | null = null;
+    uri = UTSAndroid.getAppContext()!!.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+    try {
+        if (uri != null) {
+            var outputStream: OutputStream | null = null;
+            outputStream = UTSAndroid.getAppContext()!!.getContentResolver()!!.openOutputStream(uri!!);
+            if (outputStream != null) {
+                bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, outputStream!!);
+            }
+            callback(true);
+        }
+    }
+    catch (e: IOException) {
+        e.printStackTrace();
+        callback(false);
+    }
+};
+export type InputBean = {
+    title: string | null;
+    holder: string | null;
+    nowInput: String | null;
+    inputType: number;
+    maxLength: number;
+    cancelText: string;
+    okText: string | null;
+    okCallbackClick: ((res: string) => void);
+    cancelCallbackClick: (() => void);
+};
+export const showEditDialog = function (bean: InputBean) {
+    var et: EditText = new EditText(UTSAndroid.getAppContext()!!);
+    class MyOnClickListener implements DialogInterface.OnClickListener {
+        type: number;
+        constructor(type: number) {
+            this.type = type;
+        }
+        public override onClick(dialogInterface: DialogInterface, i: Int) {
+            if (this.type == 0) {
+                bean!.okCallbackClick(et.getText().toString());
+                dialogInterface.dismiss();
+            }
+            else if (this.type == 1) {
+                bean!.cancelCallbackClick();
+                dialogInterface.dismiss();
+            }
+        }
+    }
+    var builder: AlertDialog.Builder = new AlertDialog.Builder(UTSAndroid.getUniActivity()!!);
+    if (bean.title != null || bean.title != "") {
+        builder.setTitle(bean.title);
+    }
+    builder.setPositiveButton(bean.okText, new MyOnClickListener(0));
+    if (bean.cancelText != "") {
+        builder.setNegativeButton(bean.cancelText, new MyOnClickListener(1));
+    }
+    builder.setView(et);
+    builder.create();
+    builder.show();
+};
+export const screenShotEnableState = function (state: boolean): void {
+    class MyRun implements Runnable {
+        override run() {
+            if (state) {
+                UTSAndroid.getUniActivity()!!.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+            }
+            else {
+                UTSAndroid.getUniActivity()!!.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            }
+        }
+    }
+    UTSAndroid.getUniActivity()!!.runOnUiThread(new MyRun());
+};
+export const convertHtmlPxToAndroidPx = function (htmlPx: number): number {
+    var resources: Resources = UTSAndroid.getAppContext()!!.getResources();
+    return Math.round(htmlPx * (resources.getDisplayMetrics().density));
+};
+export const showImgDialog = function () {
+    var builder: AlertDialog.Builder = new AlertDialog.Builder(UTSAndroid.getUniActivity()!!);
+    // builder.setView(img);
+    builder.create().show();
+};
+export class AndroidTTSVoice {
+    textToSpeech: TextToSpeech;
+    public onVoiceStateListener: OnVoiceStateListener | null = null;
+    constructor(callback: (init: boolean) => void) {
+        class MyListener implements TextToSpeech.OnInitListener {
+            override onInit(i: Int): void {
+                console.log("init  " + i.toString());
+                if (i == -1) {
+                    callback(false);
+                }
+                else {
+                    // this.	textToSpeech.setLanguage(Locale.CHINA);
+                    callback(true);
+                }
+            }
+        }
+        this.textToSpeech = new TextToSpeech(UTSAndroid.getUniActivity()!!, new MyListener());
+        this.textToSpeech.setOnUtteranceProgressListener(new MyTTSListener(this));
+    }
+    public speak(data: string): number {
+        var state = this.textToSpeech.speak(data, TextToSpeech.QUEUE_FLUSH, new Bundle(), UUID.randomUUID().toString());
+        return state;
+    }
+    public getVoiceNames(): string[] {
+        var voices = this.textToSpeech.getVoices();
+        var b: string[] = [];
+        for (s in voices) {
+            b.push(s.getName());
+        }
+        return b;
+    }
+    public setSpeed(num: number) {
+        this.textToSpeech.setSpeechRate(num.toFloat());
+    }
+    public setVoiceName(name: string): void {
+        var voices = this.textToSpeech.getVoices();
+        var cur: Voice | null = null;
+        for (s in voices) {
+            if (name == s.getName()) {
+                cur = s;
+            }
+        }
+        this.textToSpeech.setVoice(cur!!);
+    }
+    public stop() {
+        this.textToSpeech.stop();
+    }
+    public shutdown() {
+        this.textToSpeech.shutdown();
+    }
+    public isSpeaking(): boolean {
+        return this.textToSpeech.isSpeaking();
+    }
+    public listenerVoiceState(callback: (state: number) => void) {
+        class MyOnVoiceStateListener implements OnVoiceStateListener {
+            override onVoiceState(state: number) {
+                callback(state);
+            }
+        }
+        this.onVoiceStateListener = new MyOnVoiceStateListener();
+    }
+    getEngineName(): string {
+        return this.textToSpeech.getDefaultEngine();
+    }
+}
+interface OnVoiceStateListener {
+    onVoiceState(state: number);
+}
+class MyTTSListener extends UtteranceProgressListener {
+    ts: AndroidTTSVoice;
+    constructor(t: AndroidTTSVoice) {
+        this.ts = t;
+    }
+    public override onStart(s: string): void {
+        ts.onVoiceStateListener!.onVoiceState(0);
+    }
+    public override onDone(s: string): void {
+        ts.onVoiceStateListener!.onVoiceState(1);
+    }
+    public override onError(s: string): void {
+        console.log("onError" + s);
+        ts.onVoiceStateListener!.onVoiceState(-1);
+    }
+}
+const getSoldRadiusBg = function (colorSold: number, radius: number): GradientDrawable {
+    var drawable: GradientDrawable = new GradientDrawable();
+    drawable.setShape(GradientDrawable.RECTANGLE);
+    drawable.setCornerRadius(radius.toFloat());
+    drawable.setColor(colorSold.toInt());
+    return drawable;
+};
+// export const androidItemDialog=function(title:string,data:string[],   callback:(b:number)=>void){
+// 	class MyOnClickListener implements DialogInterface.OnClickListener{
+// 			constructor(){
+// 			}
+// 			public override onClick( dialogInterface:DialogInterface,  i:Int) {
+// 					callback(Number.from(i));
+// 				 dialogInterface.dismiss()
+// 			}
+// 	}
+// 	var builder:	AlertDialog.Builder=	new AlertDialog.Builder(UTSAndroid.getUniActivity()!!)
+// 	if(title!=""){
+// 		builder.setTitle(title)
+// 	}
+// 	var list:List<string>=new ArrayList<string>();
+// 	for(var i=0;i<data.length;i++){
+// 		list.add(data[i]);
+// 	}
+// 	builder. setAdapter(new ArrayAdapter<String>(UTSAndroid.getAppContext(), 17367043,list),new MyOnClickListener())
+// 	 builder.create().show();
+// }
